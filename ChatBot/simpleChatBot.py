@@ -10,12 +10,44 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1", #Need the support of OPENAI to use Groq's LLMs. This is the base URL for the Groq API endpoint.
 )
 
-response = client.chat.completions.create(
-    model="llama-3.3-70b-versatile",       # a free Llama model on Groq
-    messages=[
-        {"role": "system", "content": "You are a funny joker."}, #Telling the groq model, this is the way it should behave.  
-        {"role": "user",   "content": "Tell me a joke."}, #User query which is passed to the model and solved by the groq API.
-    ],
-)
+# Conversation memory
+messages = [
+    {
+        "role": "system",
+        "content": "You are a funny joker."
+    }
+]
 
-print(response.choices[0].message.content) #Printing the response from the model.   
+while True:
+
+    user_input = input("You: ")
+
+    if user_input.lower() in ["exit", "quit", "bye"]:
+        print("Chat ended.")
+        break
+
+    # Add user message
+    messages.append(
+        {
+            "role": "user",
+            "content": user_input
+        }
+    )
+
+    # Send full conversation
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=messages
+    )
+
+    assistant_reply = response.choices[0].message.content
+
+    print(f"\nAI: {assistant_reply}\n")
+
+    # Add assistant reply to memory
+    messages.append(
+        {
+            "role": "assistant",
+            "content": assistant_reply
+        }
+    )
